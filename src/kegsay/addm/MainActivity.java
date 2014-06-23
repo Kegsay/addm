@@ -32,8 +32,18 @@ public class MainActivity extends Activity {
      * 
      * @param v The view clicked
      */
-    public void onUpdateClick(View v) {
-        // TODO
+    public void onUpdateClick(final View v) {
+        v.setEnabled(false);
+
+        Addm addm = new Addm(getApplicationContext());
+        addm.executeAsync(new Addm.Callback() {
+
+            @Override
+            public void onCompleted() {
+                v.setEnabled(true);
+            }
+            
+        });
     }
 
     /**

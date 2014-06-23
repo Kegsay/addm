@@ -1,8 +1,16 @@
 package kegsay.addm;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+import android.os.SystemClock;
+import android.telephony.TelephonyManager;
 
 /**
  * This class does most of the legwork to get information about the device and converts it
@@ -35,6 +43,8 @@ public class DeviceInfo {
     private static final String KEY_BATTERY_PERCENT = "battery_percent";
     /** Value: Enum of {@link BatteryState}. */
     private static final String KEY_BATTERY_STATE = "battery_state";
+    /** Value: 'AC' or 'USB' */
+    private static final String KEY_BATTERY_CHARGE_SOURCE = "battery_charge_source";
     
     // SD Card info
     /** Value: Enum of {@link SdCardState}. */
@@ -43,7 +53,7 @@ public class DeviceInfo {
     // Time info
     /** Value: String */
     private static final String KEY_TIMEZONE = "timezone";
-    /** Value: String */
+    /** Value: Long */
     private static final String KEY_WALL_CLOCK = "wall_clock_time";
     /** Value: Long */
     private static final String KEY_UPTIME = "uptime";
@@ -58,12 +68,41 @@ public class DeviceInfo {
     
     /** Values for {@link DeviceInfo#KEY_SIM_STATE} */
     public enum SimState {
-        UNKNOWN
+        UNKNOWN(TelephonyManager.SIM_STATE_UNKNOWN),
+        ABSENT(TelephonyManager.SIM_STATE_ABSENT),
+        NETWORK_LOCKED(TelephonyManager.SIM_STATE_NETWORK_LOCKED),
+        PIN_REQUIRED(TelephonyManager.SIM_STATE_PIN_REQUIRED),
+        PUK_REQUIRED(TelephonyManager.SIM_STATE_PUK_REQUIRED),
+        READY(TelephonyManager.SIM_STATE_READY);
+        
+        private int mState;
+        
+        SimState(int simState) {
+            mState = simState;
+        }
+        
+        public int getAndroidSimState() {
+            return mState;
+        }
     }
     
     /** Values for {@link DeviceInfo#KEY_BATTERY_STATE} */
     public enum BatteryState {
-        UNKNOWN
+        UNKNOWN(BatteryManager.BATTERY_STATUS_UNKNOWN),
+        CHARGING(BatteryManager.BATTERY_STATUS_CHARGING),
+        DISCHARGING(BatteryManager.BATTERY_STATUS_DISCHARGING),
+        FULL(BatteryManager.BATTERY_STATUS_FULL),
+        NOT_CHARGING(BatteryManager.BATTERY_STATUS_NOT_CHARGING);
+        
+        private int mState;
+        
+        BatteryState(int state) {
+            mState = state;
+        }
+        
+        public int getAndroidBatteryState() {
+            return mState;
+        }
     }
     
     /** Values for {@link DeviceInfo#KEY_EXT_SD_CARD_STATE} */
@@ -72,7 +111,7 @@ public class DeviceInfo {
     }
 
     private Context mContext;
-    private JSONObject mJson;
+    private Map<String, Object> mMap;
     
     public DeviceInfo(Context context) {
         mContext = context;
@@ -83,7 +122,7 @@ public class DeviceInfo {
      * Clears any previous device info state.
      */
     public void resetInfo() {
-        mJson = new JSONObject();
+        mMap = new HashMap<String, Object>();
     }
     
     /**
@@ -91,63 +130,103 @@ public class DeviceInfo {
      */
     public void collectInfo() {
         // since it's best effort, we discard any failures when collecting, making this pretty simple.
-        addDeviceBuildInfo(mJson);
-        addNetworkInfo(mJson);
-        addSimInfo(mJson);
-        addBatteryInfo(mJson);
-        addSdCardInfo(mJson);
-        addTimeInfo(mJson);
+        addDeviceBuildInfo(mMap);
+        addNetworkInfo(mMap);
+        addSimInfo(mMap);
+        addBatteryInfo(mMap);
+        addSdCardInfo(mMap);
+        addTimeInfo(mMap);
     }
     
     public JSONObject getInfo() {
-        return mJson;
+        return new JSONObject(mMap);
     }
     
     /**
      * Adds device build model/manufacturer and OS version to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addDeviceBuildInfo(JSONObject json) {
-        
+    private void addDeviceBuildInfo(Map<String, Object> map) {
+        map.put(KEY_MANUFACTURER, android.os.Build.MANUFACTURER);
+        map.put(KEY_MODEL, android.os.Build.MODEL);
+        map.put(KEY_OS_VERSION, android.os.Build.VERSION.RELEASE);
     }
     
     /**
      * Adds wifi network information to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addNetworkInfo(JSONObject json) {
+    private void addNetworkInfo(Map<String, Object> map) {
         
     }
     
     /**
      * Adds SIM card info to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addSimInfo(JSONObject json) {
+    private void addSimInfo(Map<String, Object> map) {
+        TelephonyManager telephony = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        
+        int androidSimState = telephony.getSimState();
+        for (SimState simState : SimState.values()) {
+            if (simState.getAndroidSimState() == androidSimState) {
+                map.put(KEY_SIM_STATE, simState.name());
+                break;
+            }
+        }
+        
         
     }
     
     /**
      * Adds battery information to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addBatteryInfo(JSONObject json) {
-        
+    private void addBatteryInfo(Map<String, Object> map) {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+        if (batteryStatus != null) {
+            int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            for (BatteryState state : BatteryState.values()) {
+                if (state.getAndroidBatteryState() == status) {
+                    map.put(KEY_BATTERY_STATE, state.name());
+                    break;
+                }
+            }
+            
+            int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+            switch (chargePlug) {
+            case BatteryManager.BATTERY_PLUGGED_AC:
+                map.put(KEY_BATTERY_CHARGE_SOURCE, "AC");
+                break;
+            case BatteryManager.BATTERY_PLUGGED_USB:
+                map.put(KEY_BATTERY_CHARGE_SOURCE, "USB");
+                break;
+            }
+            
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            float batteryPct = level / (float)scale;
+            if (batteryPct >= 0.0f && batteryPct <= 100.0f) {
+                map.put(KEY_BATTERY_PERCENT, (int)batteryPct);
+            }
+        }
     }
     
     /**
      * Adds external SD card information to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addSdCardInfo(JSONObject json) {
+    private void addSdCardInfo(Map<String, Object> map) {
         
     }
     
     /**
      * Adds time information (e.g. wall clock time, time zone) to the provided JSON.
-     * @param json The JSON object to insert into. Clobbers existing keys.
+     * @param map The map to insert into. Clobbers existing keys.
      */
-    private void addTimeInfo(JSONObject json) {
-        
+    private void addTimeInfo(Map<String, Object> map) {
+        map.put(KEY_UPTIME, SystemClock.uptimeMillis());
+        map.put(KEY_WALL_CLOCK, System.currentTimeMillis());
     }
 }
