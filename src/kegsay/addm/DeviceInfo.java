@@ -8,9 +8,14 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  * This class does most of the legwork to get information about the device and converts it
@@ -27,10 +32,12 @@ public class DeviceInfo {
     private static final String KEY_MANUFACTURER = "build_manufacturer";
     
     // Network info
-    /** Value: Enum of {@link NetworkType}. */
+    /** Value: String. */
     private static final String KEY_NETWORK_TYPE = "net_type";
-    /** Value: String */
+    /** Value: String. */
     private static final String KEY_NETWORK_SSID = "net_ssid";
+    /** Value: String. */
+    private static final String KEY_NETWORK_SUBTYPE = "net_subtype";
     
     // SIM info
     /** Value: Enum of {@link SimState}. */
@@ -57,14 +64,6 @@ public class DeviceInfo {
     private static final String KEY_WALL_CLOCK = "wall_clock_time";
     /** Value: Long */
     private static final String KEY_UPTIME = "uptime";
-    
-    
-    /** Values for {@link DeviceInfo#KEY_NETWORK_TYPE} */
-    public enum NetworkType {
-        UNKNOWN,
-        WIFI,
-        MOBILE
-    }
     
     /** Values for {@link DeviceInfo#KEY_SIM_STATE} */
     public enum SimState {
@@ -157,6 +156,21 @@ public class DeviceInfo {
      * @param map The map to insert into. Clobbers existing keys.
      */
     private void addNetworkInfo(Map<String, Object> map) {
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if (wifiInfo != null) {
+            String ssid = wifiInfo.getSSID();
+            if (ssid != null) {
+                map.put(KEY_NETWORK_SSID, ssid);
+            }
+        }
+        
+        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork != null) {
+            map.put(KEY_NETWORK_TYPE, activeNetwork.getTypeName());
+            map.put(KEY_NETWORK_SUBTYPE, activeNetwork.getSubtypeName());
+        }
         
     }
     
@@ -175,6 +189,10 @@ public class DeviceInfo {
             }
         }
         
+        String number = telephony.getLine1Number();
+        if (number != null) {
+            map.put(KEY_SIM_NUMBER, number);
+        }
         
     }
     
@@ -206,7 +224,7 @@ public class DeviceInfo {
             
             int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            float batteryPct = level / (float)scale;
+            float batteryPct = 100 * (level / (float)scale);
             if (batteryPct >= 0.0f && batteryPct <= 100.0f) {
                 map.put(KEY_BATTERY_PERCENT, (int)batteryPct);
             }
@@ -226,7 +244,7 @@ public class DeviceInfo {
      * @param map The map to insert into. Clobbers existing keys.
      */
     private void addTimeInfo(Map<String, Object> map) {
-        map.put(KEY_UPTIME, SystemClock.uptimeMillis());
+        map.put(KEY_UPTIME, SystemClock.elapsedRealtime());
         map.put(KEY_WALL_CLOCK, System.currentTimeMillis());
     }
 }

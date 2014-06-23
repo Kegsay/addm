@@ -31,6 +31,7 @@ public class HttpPoker {
     }
     
     public HttpResponse doPut(String json) {
+        Log.d(TAG, mUrl+" : "+json);
         try{
             URI url = new URI(mUrl);
             HttpClient httpClient = new DefaultHttpClient();

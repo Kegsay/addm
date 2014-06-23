@@ -40,7 +40,15 @@ public class MainActivity extends Activity {
 
             @Override
             public void onCompleted() {
-                v.setEnabled(true);
+                long mins = new Config(getApplicationContext()).getUpdateRate();
+                AlarmReceiver.scheduleIn(getApplicationContext(), mins);
+                
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        v.setEnabled(true);
+                    }
+                });
             }
             
         });

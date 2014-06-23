@@ -20,12 +20,18 @@ public class Addm {
         mContext = context;
     }
     
+    public void executeAsync() {
+        executeAsync(null);
+    }
+    
     public void executeAsync(final Callback callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 execute();
-                callback.onCompleted();
+                if (callback != null) {
+                    callback.onCompleted();
+                }
             }
         }).start();
     }
