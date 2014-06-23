@@ -15,6 +15,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -33,6 +34,8 @@ public class DeviceInfo {
     private static final String KEY_MANUFACTURER = "build_manufacturer";
     /** Value: String. */
     private static final String KEY_SERIAL = "serial";
+    /** Value: String. */
+    private static final String KEY_SECURE_ANDROID_ID = "secure_android_id";
     
     // Network info
     /** Value: String. */
@@ -153,6 +156,15 @@ public class DeviceInfo {
         map.put(KEY_MANUFACTURER, android.os.Build.MANUFACTURER);
         map.put(KEY_MODEL, android.os.Build.MODEL);
         map.put(KEY_OS_VERSION, android.os.Build.VERSION.RELEASE);
+        
+        try {
+            String secureAndroidId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+            if (secureAndroidId != null) {
+                map.put(KEY_SECURE_ANDROID_ID, secureAndroidId);
+            }
+        }
+        catch (Exception e) {} // ignore, best effort.
+        
         if (android.os.Build.VERSION.SDK_INT >= 9) {
             map.put(KEY_SERIAL, android.os.Build.SERIAL);
         }
