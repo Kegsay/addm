@@ -13,6 +13,7 @@ public class Config {
     private static final String CONFIG_PREFS = "config_prefs";
     private static final String KEY_UPDATE_RATE_MINS = "kegsay.addm.Config.KEY_UPDATE_RATE_MINS";
     private static final String KEY_URL = "kegsay.addm.Config.KEY_URL";
+    private static final String KEY_LAST_POKE_TIME = "kegsay.addm.Config.KEY_LAST_POKE_TIME";
     
     private Context mContext;
     private SharedPreferences mPrefs;
@@ -52,5 +53,13 @@ public class Config {
      */
     public String getUrl() {
         return mPrefs.getString(KEY_URL, Config.DEFAULT_URL);
+    }
+    
+    public long getLastPokeTime() {
+        return mPrefs.getLong(KEY_LAST_POKE_TIME, -1L);
+    }
+    
+    public void setLastPokeTime(long time) {
+        mPrefs.edit().putLong(KEY_LAST_POKE_TIME, time).commit();
     }
 }

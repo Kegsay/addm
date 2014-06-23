@@ -1,11 +1,14 @@
 package kegsay.addm;
 
+import java.util.Date;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -25,6 +28,19 @@ public class MainActivity extends Activity {
         // populate from config
         mUrl.setText(mConfig.getUrl());
         mUpdateRate.setText(String.valueOf(mConfig.getUpdateRate()));
+        
+        updateLastPoked();
+    }
+    
+    private void updateLastPoked() {
+        TextView text = (TextView)findViewById(R.id.textView_lastpoke);
+        long lastPoke = mConfig.getLastPokeTime();
+        if (lastPoke > 0L) {
+            text.setText("Last poked: "+new Date(lastPoke));
+        }
+        else {
+            text.setText("Last poked: Never.");
+        }
     }
 
     /**
@@ -47,6 +63,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         v.setEnabled(true);
+                        updateLastPoked();
                     }
                 });
             }

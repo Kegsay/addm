@@ -44,6 +44,8 @@ public class Addm {
         Config config = new Config(mContext);
         HttpPoker poker = new HttpPoker(config.getUrl());
         poker.doPut(json);
+        
+        config.setLastPokeTime(System.currentTimeMillis());
     }
     
     
