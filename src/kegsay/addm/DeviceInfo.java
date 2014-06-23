@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -30,6 +31,8 @@ public class DeviceInfo {
     private static final String KEY_MODEL = "build_model";
     /** Value: String. */
     private static final String KEY_MANUFACTURER = "build_manufacturer";
+    /** Value: String. */
+    private static final String KEY_SERIAL = "serial";
     
     // Network info
     /** Value: String. */
@@ -145,10 +148,14 @@ public class DeviceInfo {
      * Adds device build model/manufacturer and OS version to the provided JSON.
      * @param map The map to insert into. Clobbers existing keys.
      */
+    @SuppressLint("NewApi")
     private void addDeviceBuildInfo(Map<String, Object> map) {
         map.put(KEY_MANUFACTURER, android.os.Build.MANUFACTURER);
         map.put(KEY_MODEL, android.os.Build.MODEL);
         map.put(KEY_OS_VERSION, android.os.Build.VERSION.RELEASE);
+        if (android.os.Build.VERSION.SDK_INT >= 9) {
+            map.put(KEY_SERIAL, android.os.Build.SERIAL);
+        }
     }
     
     /**
