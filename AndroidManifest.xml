@@ -36,8 +36,6 @@
         <receiver android:name="kegsay.addm.AlarmReceiver" android:enabled="true">
 		    <intent-filter>
 		        <action android:name="kegsay.addm.AlarmReceiver.ACTION_POKE" />
-		    </intent-filter>
-		    <intent-filter> 
 		        <action android:name="android.intent.action.BOOT_COMPLETED" />
 		    </intent-filter>
 		</receiver>
