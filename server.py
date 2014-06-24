@@ -2,13 +2,17 @@
 import datetime
 import time
 import json
+import os
 import sys
 import signal
 from threading import Thread
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
  
+dump_dir = ""
+
 class PUTHandler(BaseHTTPRequestHandler):
     def do_PUT(self):
+        global dump_dir
         print self.headers
         length = int(self.headers.getheader('Content-Length', 0))
         content = self.rfile.read(length)
@@ -22,7 +26,7 @@ class PUTHandler(BaseHTTPRequestHandler):
 
             filename = get_filename(info)
             print "Filename %s with data %s" % (filename, info)
-            with open(filename, 'w') as output:
+            with open(os.path.join(dump_dir,filename), 'w') as output:
                 output.write(json.dumps(info))
             self.send_response(200)
         except Exception as e:
@@ -67,7 +71,10 @@ def run_on(port):
     httpd.serve_forever()
  
 if __name__ == "__main__":
+    global dump_dir
     port = int(sys.argv[1])
+    dump_dir = sys.argv[2]
+    print "Dumping to directory %s" % dump_dir
     server = Thread(target=run_on, args=[port])
     server.daemon = True
     server.start()
