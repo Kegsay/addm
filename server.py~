@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import time
 import json
 import sys
 import signal
@@ -13,38 +12,11 @@ class PUTHandler(BaseHTTPRequestHandler):
         content = self.rfile.read(length)
         try:
             info = json.loads(content)
-            info["server_ts"] = int(time.time())
-            filename = get_filename(info)
-            print "Filename %s with data %s" % (filename, info)
-            with open(filename, 'w') as output:
-                output.write(json.dumps(info))
+            print info
             self.send_response(200)
         except Exception as e:
             print "Failed to parse PUT: %s" % e
-            self.send_response(500)
-
-def get_filename(content):
-    """ Get a suitable filename for this device poke. Typically
-    this is a unique device ID.
-
-    Args:
-        content : The JSON object submitted from the device
-    Returns:
-        A suitable filename.
-    """
-    # just blob serial and secure if they exist.
-    fname = ""
-    if "serial" in content:
-        fname += content["serial"]
-        fname += "--"
-    if "secure_android_id" in content:
-        fname += content["secure_android_id"]
-
-    if len(fname) == 0:
-        # can't really store this then
-        raise Exception("No valid device identifying keys")
-
-    return fname + ".json"
+        self.send_response(500)
  
 def run_on(port):
     print("Starting a server on port %i" % port)
