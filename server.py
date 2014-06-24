@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime
 import time
 import json
 import sys
@@ -13,7 +14,12 @@ class PUTHandler(BaseHTTPRequestHandler):
         content = self.rfile.read(length)
         try:
             info = json.loads(content)
-            info["server_ts"] = int(time.time())
+            info["server_ts"] = to_date(int(time.time()))
+            if "uptime" in info:
+                    info["uptime"] = to_hms(int(info["uptime"]/1000))
+            if "wall_clock_time" in info:
+                    info["wall_clock_time"] = to_date(int(info["wall_clock_time"]/1000))
+
             filename = get_filename(info)
             print "Filename %s with data %s" % (filename, info)
             with open(filename, 'w') as output:
@@ -22,6 +28,14 @@ class PUTHandler(BaseHTTPRequestHandler):
         except Exception as e:
             print "Failed to parse PUT: %s" % e
             self.send_response(500)
+
+def to_date(ts):
+    return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+def to_hms(time_secs):
+    mins, secs = divmod(time_secs, 60)
+    hours, mins = divmod(mins, 60)
+    return '%02dh %02dm %02ds' % (hours, mins, secs)
 
 def get_filename(content):
     """ Get a suitable filename for this device poke. Typically
