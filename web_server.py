@@ -24,9 +24,13 @@ class getdevices:
         devices_json = json.loads('{}')
         for row in data:
             devices_json[row["id"]] = json.loads(row["data"])
-        
+            
+        # check for JSONP requests
         web.header("Content-Type", "application/json")
-        return json.dumps(devices_json)
+        if "callback" in web.input():
+            return web.input()["callback"] + "(" + json.dumps(devices_json) + ")"
+        else:
+            return json.dumps(devices_json)
         
         
 def insert_device_data(dev_id, dev_data):
