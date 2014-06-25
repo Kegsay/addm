@@ -27,5 +27,5 @@ The base URL which is poked along with the update rate can be configured from th
 
 Server [TODO]
 ------
-ADDM also includes a Django web server to service PUTs and provide a web interface for accessing information about devices. This makes it easy to get ADDM working usefully straight out the box.
+ADDM also includes a basic web server to service PUTs and provide a REST interface for accessing information about devices. There is also a small javascript/jquery file which will present data from the server in a table. This makes it easy to get ADDM working usefully straight out the box.
 
