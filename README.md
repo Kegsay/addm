@@ -23,7 +23,7 @@ This may later include:
 - Location of the device (cached / coarse / fine, configurable to reduce battery drain)
 - A 'ping my device' feature which will make the device vibrate/make noises so it can be easily located. This will be done using GCM to avoid unnecessary battery drain. This feature will need to be configured before use.
 
-The base URL which is poked along with the update rate can be configured from the application. Data is sent as JSON via an HTTP PUT to <base url>/<device serial>--<device secure id>
+The base URL which is poked along with the update rate can be configured from the application. Data is sent as JSON via an HTTP PUT to [base url]/[device serial]--[device secure id]
 
 Server [TODO]
 ------
