@@ -23,9 +23,9 @@ This may later include:
 - Location of the device (cached / coarse / fine, configurable to reduce battery drain)
 - A 'ping my device' feature which will make the device vibrate/make noises so it can be easily located. This will be done using GCM to avoid unnecessary battery drain. This feature will need to be configured before use.
 
-The base URL which is poked along with the update rate can be configured from the application. Data is sent as JSON via an HTTP PUT to [base url]/[device serial]--[device secure id]
+The base URL which is poked along with the update rate can be configured from the application. Data is sent as JSON via an HTTP PUT to [base url]/addm/device/[device serial]--[device secure id]
 
-Server [TODO]
+Server
 ------
-ADDM also includes a basic web server to service PUTs and provide a REST interface for accessing information about devices. There is also a small javascript/jquery file which will present data from the server in a table. This makes it easy to get ADDM working usefully straight out the box.
+ADDM also includes a basic web server (done in web.py) to service the PUTs done by the devices and provide a REST interface for accessing information about devices. This allows you to GET to /addm/devices to receive all the latest device information as JSON. There is also an HTML file which will present data from /addm/devices in a sortable table using JS/JQuery. This makes it easy to get ADDM working usefully straight out the box.
 
