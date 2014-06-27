@@ -44,6 +44,10 @@ $(window).load(function(){
                         entry[tstodate_key] = new Date(entry[tstodate_key]).toLocaleString();
                     }
                 }
+
+                if ("serial" in entry && entry["serial"] in addm_serials) {
+                    entry["serial"] = addm_serials[entry["serial"]];
+                }
                 
                 results.push(entry);
             }
@@ -53,6 +57,7 @@ $(window).load(function(){
             // show only some of the headers instead of all of them and give them pretty names
             filteredHeaders = {build_manufacturer:"Manufacturer", 
                                build_model:"Model", 
+                               serial:"Serial/Name",
                                server_ts:"Last seen", 
                                sim_state:"SIM State", 
                                battery_percent:"Battery %", 
