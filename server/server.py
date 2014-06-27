@@ -58,6 +58,7 @@ def setup_db():
     script_folder = os.sep.join(os.path.realpath(__file__).split(os.sep)[:-1]) # snip off filename
     data_folder = os.path.join(script_folder, "data") # subdir of script folder
     database_abs_path = os.path.join(data_folder, dbname)
+    print "Database located at %s" % database_abs_path
     con = sqlite3.connect(database_abs_path)
     con.execute('CREATE TABLE IF NOT EXISTS devices(id TEXT PRIMARY KEY, data TEXT, UNIQUE(id) ON CONFLICT REPLACE);')
     return web.database(dbn='sqlite', db=database_abs_path)
