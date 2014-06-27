@@ -28,17 +28,17 @@ $(window).load(function(){
                 entry = data[key];
                 entry._id = key;
                 
-                ms_to_hms_keys = [ "uptime" ]
+                ms_to_hms_keys = [ "uptime" ];
                 for (var ikey=0; ikey<ms_to_hms_keys.length; ikey++) {
-                    mstohms_key = ms_to_hms_keys[ikey]
+                    mstohms_key = ms_to_hms_keys[ikey];
                     if (mstohms_key in entry) {
                         entry[mstohms_key] = msToTime(entry[mstohms_key]);
                     }
                 }
 
-                ts_to_date_keys = [ "wall_clock_time" , "server_ts" ]
+                ts_to_date_keys = [ "wall_clock_time" , "server_ts" ];
                 for (var ikey=0; ikey<ts_to_date_keys.length; ikey++) {
-                    tstodate_key = ts_to_date_keys[ikey]
+                    tstodate_key = ts_to_date_keys[ikey];
                     if (tstodate_key in entry) {
                         entry[tstodate_key] = new Date(entry[tstodate_key]).toLocaleString();
                     }
@@ -68,13 +68,13 @@ $(window).load(function(){
                     var cellValue = "";
                     if (header in results[i]) {
                         cellValue = results[i][header];
+                    }
                     tr.append("<td>" + cellValue + "</td>");
                 }
                 $('#addmtablebody').append(tr);
             }
             
             $('#addmtable').tablesorter(); 
-            }
         }
     });
 });
