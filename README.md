@@ -3,8 +3,8 @@ Android Development Device Monitor
 
 Got lots of test devices but don't know where they are, if they are charged, which SIM is in them, etc? ADDM is a simple Android application which will periodically poke a URL with information about the device.
 
-Client
-------
+Android Client
+--------------
 The client is an APK which can be installed on test devices. It will run on startup and periodically do an HTTP PUT to the in-app configured URL.
 
 The PUT includes the following data:
@@ -27,5 +27,9 @@ The base URL which is poked along with the update rate can be configured from th
 
 Server
 ------
-ADDM also includes a basic web server (done in web.py) to service the PUTs done by the devices and provide a REST interface for accessing information about devices. This allows you to GET to /addm/devices to receive all the latest device information as JSON. There is also an HTML file which will present data from /addm/devices in a sortable table using JS/JQuery. This makes it easy to get ADDM working usefully straight out the box.
+ADDM includes a basic web server (done in web.py) to service the PUTs done by the devices and provide a REST interface for accessing information about devices. This allows you to GET to /addm/devices to receive all the latest device information as JSON. 
+
+Web Client
+----------
+ADDM also includes a web client which uses the REST API provided by the server. This will present data from /addm/devices in a sortable table using JS/JQuery. This makes it easy to get ADDM working usefully straight out the box.
 
