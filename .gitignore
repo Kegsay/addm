@@ -28,3 +28,6 @@ proguard/
 
 # Server generated databases
 *.db
+
+# Client-side configs
+serials.js
