@@ -16,6 +16,9 @@ gen/
 .gradle/
 build/
 
+# ant files
+build.xml
+
 # Local configuration file (sdk path, etc)
 local.properties
 ant.properties
