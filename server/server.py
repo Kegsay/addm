@@ -1,8 +1,10 @@
 """ Simple REST web server using web.py """
+import datetime
 import json
 import os
 import sqlite3
 import sys
+import time
 import web
 
 class putdevice:
@@ -10,6 +12,7 @@ class putdevice:
     def PUT(self, device_id):
         # this will throw if the data isn't valid json
         device_data = json.loads(web.data())
+        device_data["server_ts"] = to_date(int(time.time()))
         insert_device_data(device_id, device_data)
 
 class getdevices:
@@ -33,6 +36,8 @@ class getdevices:
         else:
             return json.dumps(devices_json)
         
+def to_date(ts):
+    return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         
 def insert_device_data(dev_id, dev_data):
     """ INSERTs device data into the database.
