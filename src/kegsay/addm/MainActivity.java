@@ -38,6 +38,9 @@ public class MainActivity extends Activity {
         if (lastPoke > 0L) {
             text.setText("Last poked: "+new Date(lastPoke));
         }
+        else if (lastPoke == Addm.ERROR_SERVER_HIT_FAILED) {
+            text.setText("Last poked: There was a problem poking the server.");
+        }
         else {
             text.setText("Last poked: Never.");
         }
@@ -105,6 +108,7 @@ public class MainActivity extends Activity {
             Toast.makeText(getApplicationContext(), "URL must be http/https.", Toast.LENGTH_SHORT).show();
             return;
         }
+        Toast.makeText(getApplicationContext(), "Data will be PUT to " + uri + Addm.ADDM_PATH + "device_id_here", Toast.LENGTH_LONG).show();
         
         mConfig.setUrl(url);
         mConfig.setUpdateRate(updateFreqMins);

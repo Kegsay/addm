@@ -1,5 +1,6 @@
 package kegsay.addm;
 
+import org.apache.http.HttpResponse;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -9,6 +10,8 @@ import android.content.Context;
  * Brings everything together.
  */
 public class Addm {
+    public static final String ADDM_PATH = "/addm/device/";
+    public static final long ERROR_SERVER_HIT_FAILED = -2L;
     
     public interface Callback {
         public void onCompleted();
@@ -42,10 +45,10 @@ public class Addm {
         JSONObject json = info.getInfo();
         
         Config config = new Config(mContext);
-        HttpPoker poker = new HttpPoker(config.getUrl());
-        poker.doPut(json);
-        
-        config.setLastPokeTime(System.currentTimeMillis());
+        HttpPoker poker = new HttpPoker(config.getUrl() + ADDM_PATH + info.getDeviceId());
+        HttpResponse response = poker.doPut(json);
+        boolean success = response != null && response.getStatusLine().getStatusCode() == 200;
+        config.setLastPokeTime(success ? System.currentTimeMillis() : ERROR_SERVER_HIT_FAILED);
     }
     
     

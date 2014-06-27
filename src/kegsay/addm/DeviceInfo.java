@@ -146,6 +146,19 @@ public class DeviceInfo {
     public JSONObject getInfo() {
         return new JSONObject(mMap);
     }
+
+    private String getSecureId() {
+        try {
+            return Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        }
+        catch (Exception e) {} // ignore, best effort.
+        return null;
+    }
+
+    public String getDeviceId() {
+        String serial = android.os.Build.VERSION.SDK_INT >= 9 ? android.os.Build.SERIAL : "";
+        return serial + "--" + getSecureId();
+    }
     
     /**
      * Adds device build model/manufacturer and OS version to the provided JSON.
@@ -156,14 +169,11 @@ public class DeviceInfo {
         map.put(KEY_MANUFACTURER, android.os.Build.MANUFACTURER);
         map.put(KEY_MODEL, android.os.Build.MODEL);
         map.put(KEY_OS_VERSION, android.os.Build.VERSION.RELEASE);
-        
-        try {
-            String secureAndroidId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-            if (secureAndroidId != null) {
-                map.put(KEY_SECURE_ANDROID_ID, secureAndroidId);
-            }
+       
+        String secureAndroidId = getSecureId();
+        if (secureAndroidId != null) { 
+            map.put(KEY_SECURE_ANDROID_ID, secureAndroidId);
         }
-        catch (Exception e) {} // ignore, best effort.
         
         if (android.os.Build.VERSION.SDK_INT >= 9) {
             map.put(KEY_SERIAL, android.os.Build.SERIAL);
