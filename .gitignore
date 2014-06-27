@@ -27,4 +27,4 @@ ant.properties
 proguard/
 
 # Server generated databases
-addm.db
+*.db
