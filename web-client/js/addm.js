@@ -50,14 +50,21 @@ $(window).load(function(){
             
             console.log(JSON.stringify(results));
             
-            // show only some of the headers instead of all of them
-            filteredHeaders = {build_manufacturer:true, build_model:true, server_ts:true, sim_state:true, battery_percent:true, battery_charge_source:true, uptime:true, os_version:true }
+            // show only some of the headers instead of all of them and give them pretty names
+            filteredHeaders = {build_manufacturer:"Manufacturer", 
+                               build_model:"Model", 
+                               server_ts:"Last seen", 
+                               sim_state:"SIM State", 
+                               battery_percent:"Battery %", 
+                               battery_charge_source:"Charging", 
+                               uptime:"Uptime", 
+                               os_version:"OS" }
             
             // add in headers
             var th;
             for (var header in filteredHeaders) {
                 th = $('<th/>');
-                th.append("<span>" + header + "</span>");
+                th.append("<span>" + filteredHeaders[header] + "</span>");
                 $('#addmtablehead').append(th);
             }
             
