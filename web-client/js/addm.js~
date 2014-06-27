@@ -22,7 +22,7 @@ $(window).load(function(){
             results = [];
             for (var key in data) {
                 if (!data.hasOwnProperty(key)) { continue; }
-                for (field in data[key]) { // add json keys as header names
+                for (field in data[key]) {
                     headerSet[field] = true;
                 }
                 entry = data[key];
@@ -40,7 +40,7 @@ $(window).load(function(){
                 for (var ikey=0; ikey<ts_to_date_keys.length; ikey++) {
                     tstodate_key = ts_to_date_keys[ikey]
                     if (tstodate_key in entry) {
-                        entry[tstodate_key] = new Date(entry[tstodate_key]).toLocaleString();
+                        entry[tstodate_key] = new Date(entry[tstodate_key]).toString();
                     }
                 }
                 
@@ -49,12 +49,9 @@ $(window).load(function(){
             
             console.log(JSON.stringify(results));
             
-            // show only some of the headers instead of all of them
-            filteredHeaders = {build_manufacturer:true, build_model:true, server_ts:true, sim_state:true, battery_percent:true, battery_charge_source:true, uptime:true, os_version:true }
-            
             // add in headers
             var th;
-            for (var header in filteredHeaders) {
+            for (var header in headerSet) {
                 th = $('<th/>');
                 th.append("<span>" + header + "</span>");
                 $('#addmtablehead').append(th);
@@ -64,7 +61,7 @@ $(window).load(function(){
             var tr;
             for (var i = 0; i < results.length; i++) {
                 tr = $('<tr/>');
-                for (var header in filteredHeaders) {
+                for (var header in headerSet) {
                     var cellValue = "";
                     if (header in results[i]) {
                         cellValue = results[i][header];
