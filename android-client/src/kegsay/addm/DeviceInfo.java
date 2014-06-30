@@ -1,7 +1,9 @@
 package kegsay.addm;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.json.JSONObject;
 
@@ -9,11 +11,15 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -36,6 +42,8 @@ public class DeviceInfo {
     private static final String KEY_SERIAL = "serial";
     /** Value: String. */
     private static final String KEY_SECURE_ANDROID_ID = "secure_android_id";
+    /** Value: Integer. */
+    private static final String KEY_SDK_INT = "sdk_int";
     
     // Network info
     /** Value: String. */
@@ -60,7 +68,7 @@ public class DeviceInfo {
     private static final String KEY_BATTERY_CHARGE_SOURCE = "battery_charge_source";
     
     // SD Card info
-    /** Value: Enum of {@link SdCardState}. */
+    /** Value: String. */
     private static final String KEY_EXT_SD_CARD_STATE = "ext_sd_card_state";
     
     // Time info
@@ -70,6 +78,12 @@ public class DeviceInfo {
     private static final String KEY_WALL_CLOCK = "wall_clock_time";
     /** Value: Long */
     private static final String KEY_UPTIME = "uptime";
+    
+    //Location info
+    /** Value: String. */
+    private static final String KEY_LOCATION_GEO_URI = "geo_uri";
+    /** Value: String. */
+    private static final String KEY_LOCATION_PROVIDER = "location_provider";
     
     /** Values for {@link DeviceInfo#KEY_SIM_STATE} */
     public enum SimState {
@@ -109,11 +123,6 @@ public class DeviceInfo {
             return mState;
         }
     }
-    
-    /** Values for {@link DeviceInfo#KEY_EXT_SD_CARD_STATE} */
-    public enum SdCardState {
-        UNKNOWN
-    }
 
     private Context mContext;
     private Map<String, Object> mMap;
@@ -141,6 +150,7 @@ public class DeviceInfo {
         addBatteryInfo(mMap);
         addSdCardInfo(mMap);
         addTimeInfo(mMap);
+        addLocationInfo(mMap);
     }
     
     public JSONObject getInfo() {
@@ -155,6 +165,7 @@ public class DeviceInfo {
         return null;
     }
 
+    @SuppressLint("NewApi")
     public String getDeviceId() {
         String serial = android.os.Build.VERSION.SDK_INT >= 9 ? android.os.Build.SERIAL : "";
         return serial + "--" + getSecureId();
@@ -169,6 +180,7 @@ public class DeviceInfo {
         map.put(KEY_MANUFACTURER, android.os.Build.MANUFACTURER);
         map.put(KEY_MODEL, android.os.Build.MODEL);
         map.put(KEY_OS_VERSION, android.os.Build.VERSION.RELEASE);
+        map.put(KEY_SDK_INT, android.os.Build.VERSION.SDK_INT);
        
         String secureAndroidId = getSecureId();
         if (secureAndroidId != null) { 
@@ -201,6 +213,40 @@ public class DeviceInfo {
             map.put(KEY_NETWORK_SUBTYPE, activeNetwork.getSubtypeName());
         }
         
+    }
+    
+    private void addLocationInfo(Map<String, Object> map) {
+        try {
+            LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            Location lastKnown = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastKnown == null) {
+                lastKnown = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (lastKnown == null) {
+                    lastKnown = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                }
+            }
+            
+            if (lastKnown != null) {
+                StringBuilder geoUri = new StringBuilder("geo:");
+                geoUri.append(lastKnown.getLatitude());
+                geoUri.append(",");
+                geoUri.append(lastKnown.getLongitude());
+                if (lastKnown.hasAltitude()) {
+                    geoUri.append(",");
+                    geoUri.append(lastKnown.getAltitude());
+                }
+                if (lastKnown.hasAccuracy()) {
+                    geoUri.append(";u=");
+                    geoUri.append(lastKnown.getAccuracy());
+                }
+                map.put(KEY_LOCATION_GEO_URI, geoUri.toString());
+                map.put(KEY_LOCATION_PROVIDER, lastKnown.getProvider());
+            }
+        }
+        catch (Exception e) {
+            // best effort. Catch all since we can't really rely on OS being sensible
+            Log.e("ADDM","Failed to get location info: "+e);
+        }
     }
     
     /**
@@ -265,7 +311,10 @@ public class DeviceInfo {
      * @param map The map to insert into. Clobbers existing keys.
      */
     private void addSdCardInfo(Map<String, Object> map) {
-        
+        String state = Environment.getExternalStorageState();
+        if (state != null) {
+            map.put(KEY_EXT_SD_CARD_STATE, state);
+        }
     }
     
     /**
@@ -275,5 +324,9 @@ public class DeviceInfo {
     private void addTimeInfo(Map<String, Object> map) {
         map.put(KEY_UPTIME, SystemClock.elapsedRealtime());
         map.put(KEY_WALL_CLOCK, System.currentTimeMillis());
+        TimeZone timeZone = TimeZone.getDefault();
+        if (timeZone != null) {
+            map.put(KEY_TIMEZONE, timeZone.getDisplayName(false, TimeZone.SHORT, Locale.US));
+        }
     }
 }
