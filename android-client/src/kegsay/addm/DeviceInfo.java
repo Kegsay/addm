@@ -231,7 +231,7 @@ public class DeviceInfo {
      */
     private void addBatteryInfo(Map<String, Object> map) {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+        Intent batteryStatus = mContext.getApplicationContext().registerReceiver(null, ifilter);
         if (batteryStatus != null) {
             int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
             for (BatteryState state : BatteryState.values()) {
