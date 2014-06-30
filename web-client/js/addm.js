@@ -63,7 +63,8 @@ $(window).load(function(){
                                battery_percent:"Battery %", 
                                battery_charge_source:"Charging", 
                                uptime:"Uptime", 
-                               os_version:"OS" }
+                               os_version:"OS",
+                               geo_uri:"Location"}
             
             // add in headers
             var th;
