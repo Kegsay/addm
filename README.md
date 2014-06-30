@@ -14,13 +14,13 @@ The PUT includes the following data:
 - Network information (mobile/wifi data, 3G/4G/SSID)
 - SIM status + number
 - Battery % and charging status
-- External SD card status [TODO]
+- External SD card status
 - System uptime and wall clock time
+- Location of the device (cached only)
 
 This may later include:
 - The google account logged into the device
 - The applications installed on the device (package names, app names, version strings/numbers, debug/release signatures)
-- Location of the device (cached / coarse / fine, configurable to reduce battery drain)
 - A 'ping my device' feature which will make the device vibrate/make noises so it can be easily located. This will be done using GCM to avoid unnecessary battery drain. This feature will need to be configured before use.
 
 The base URL which is poked along with the update rate can be configured from the application. Data is sent as JSON via an HTTP PUT to [base url]/addm/device/[device serial]--[device secure id]
