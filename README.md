@@ -13,7 +13,7 @@ The PUT includes the following data:
 - OS version
 - Network information (mobile/wifi data, 3G/4G/SSID)
 - SIM status + number
-- Battery % and charging status
+- Battery % and charging status (discharging/charging/full)
 - External SD card status
 - System uptime and wall clock time
 - Location of the device (cached only)
